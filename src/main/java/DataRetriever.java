@@ -169,7 +169,7 @@ public class DataRetriever {
                                di.id as dish_ingredient_id,
                                di.quantity_required as quantity_required,
                                di.unit as  ingredient_unit,
-                               d.id as dish_ingredient,
+                               d.id as dish_id,
                                d.name as dish_name,
                                d.dish_type as dish_type,
                                d.price as dish_price
@@ -191,7 +191,8 @@ public class DataRetriever {
                         new Dish(
                             rs.getInt("dish_id"),
                                 rs.getString("dish_name"),
-                                DishTypeEnum.valueOf(rs.getString("dish_type"))
+                                DishTypeEnum.valueOf(rs.getString("dish_type")),
+                                List.of(),
                                 rs.getDouble("dish_price")
                         )
                 );

@@ -1,9 +1,11 @@
+import java.util.ArrayList;
+import java.util.List;
+
 public class Main {
     public static void main(String[] args) {
         // Log before changes
         DataRetriever dataRetriever = new DataRetriever();
         Dish dish = dataRetriever.findDishById(4
-
         );
         System.out.println(dish);
 
@@ -15,5 +17,20 @@ public class Main {
         // Ingredient creations
         //List<Ingredient> createdIngredients = dataRetriever.createIngredients(List.of(new Ingredient(null, "Fromage", CategoryEnum.DAIRY, 1200.0)));
         //System.out.println(createdIngredients);
+
+        List<Dish> dishesToTest  = new ArrayList<>();
+        dishesToTest.add(dataRetriever.findDishById(1));
+        dishesToTest.add(dataRetriever.findDishById(2));
+        dishesToTest.add(dataRetriever.findDishById(3));
+        dishesToTest.add(dataRetriever.findDishById(4));
+        dishesToTest.add(dataRetriever.findDishById(5));
+        for(Dish d : dishesToTest) {
+            System.out.println(d.getName() + " | cost: " + d.getDishCost());
+            try {
+            System.out.println(d.getName() + " | margin: " + d.getGrossMargin());
+            } catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        }
     }
 }

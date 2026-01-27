@@ -20,10 +20,6 @@ public class Ingredient {
         this.price = price;
     }
 
-    public String getDishName() {
-        return dish == null ? null : dish.getName();
-    }
-
     public Integer getId() {
         return id;
     }
@@ -60,7 +56,7 @@ public class Ingredient {
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Ingredient that = (Ingredient) o;
-        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && category == that.category && Objects.equals(price, that.price) && Objects.equals(dish, that.dish);
+        return Objects.equals(id, that.id) && Objects.equals(name, that.name) && category == that.category && Objects.equals(price, that.price);
     }
 
     @Override
@@ -75,7 +71,6 @@ public class Ingredient {
                 ", name='" + name + '\'' +
                 ", category=" + category +
                 ", price=" + price +
-                ", dishName=" + getDishName() +
                 '}';
     }
 }

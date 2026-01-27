@@ -8,6 +8,7 @@ public class Dish {
     private DishTypeEnum dishType;
     private List<DishIngredient> ingredients;
 
+
     public Double getPrice() {
         return price;
     }
@@ -35,6 +36,13 @@ public class Dish {
         this.ingredients = ingredients;
     }
 
+    public Dish(Integer id, String name, DishTypeEnum dishType, List<DishIngredient> ingredients, Double price) {
+        this.id = id;
+        this.name = name;
+        this.dishType = dishType;
+        this.ingredients = ingredients;
+        this.price = price;
+    }
 
     public Integer getId() {
         return id;
