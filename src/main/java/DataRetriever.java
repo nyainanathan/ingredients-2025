@@ -5,8 +5,10 @@ import java.util.stream.Collectors;
 
 public class DataRetriever {
     Dish findDishById(Integer id) {
+
         DBConnection dbConnection = new DBConnection();
         Connection connection = dbConnection.getConnection();
+
         try {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     """
@@ -126,96 +128,63 @@ public class DataRetriever {
         }
     }
 
-
-//    private void detachIngredients(Connection conn, Integer dishId, List<Ingredient> ingredients)
-//            throws SQLException {
-//        if (ingredients == null || ingredients.isEmpty()) {
-//            try (PreparedStatement ps = conn.prepareStatement(
-//                    "UPDATE ingredient SET id_dish = NULL WHERE id_dish = ?")) {
-//                ps.setInt(1, dishId);
-//                ps.executeUpdate();
-//            }
-//            return;
-//        }
-//
-//        String baseSql = """
-//                    UPDATE ingredient
-//                    SET id_dish = NULL
-//                    WHERE id_dish = ? AND id NOT IN (%s)
-//                """;
-//
-//        String inClause = ingredients.stream()
-//                .map(i -> "?")
-//                .collect(Collectors.joining(","));
-//
-//        String sql = String.format(baseSql, inClause);
-//
-//        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-//            ps.setInt(1, dishId);
-//            int index = 2;
-//            for (Ingredient ingredient : ingredients) {
-//                ps.setInt(index++, ingredient.getId());
-//            }
-//            ps.executeUpdate();
-//        }
-//    }
-//
-//    private void attachIngredients(Connection conn, Integer dishId, List<Ingredient> ingredients)
-//            throws SQLException {
-//
-//        if (ingredients == null || ingredients.isEmpty()) {
-//            return;
-//        }
-//
-//        String attachSql = """
-//                    UPDATE ingredient
-//                    SET id_dish = ?
-//                    WHERE id = ?
-//                """;
-//
-//        try (PreparedStatement ps = conn.prepareStatement(attachSql)) {
-//            for (Ingredient ingredient : ingredients) {
-//                ps.setInt(1, dishId);
-//                ps.setInt(2, ingredient.getId());
-//                ps.addBatch(); // Can be substitute ps.executeUpdate() but bad performance
-//            }
-//            ps.executeBatch();
-//        }
-//    }
-
-    private List<Ingredient> findIngredientByDishId(Integer idDish) {
+    private List<DishIngredient> findDishIngredientByDishId(Integer idDish) {
         DBConnection dbConnection = new DBConnection();
         Connection connection = dbConnection.getConnection();
-        List<Ingredient> ingredients = new ArrayList<>();
+        List<DishIngredient> ingredients = new ArrayList<>();
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-            SELECT i.id, i.name, i.price, i.category,
-                   di.quantity_required
-            FROM ingredient i
-            JOIN dishingredients di
-            ON i.id =  di.id_ingredient
-            WHERE id_dish = ?
-            """);
 
-            preparedStatement.setInt(1, idDish);
+            PreparedStatement ps = connection.prepareStatement(
+                    """
+                        SELECT i.id as ingredient_id,
+                               i.name as ingredient_name,
+                               i.price as ingredient_price,
+                               i.category as ingredient_category,
+                               di.id as dish_ingredient_id,
+                               di.quantity_required as quantity_required,
+                               di.unit as  ingredient_unit,
+                               d.id as dish_ingredient,
+                               d.name as dish_name,
+                               d.dish_type as dish_type,
+                               d.price as dish_price
+                        FROM ingredient i
+                        JOIN dishingredients di ON i.id = di.id_ingredient
+                        JOIN dish d ON d.id = di.id_dish
+                        WHERE di.id_dish = ?
+                        """
+            );
 
-            ResultSet resultSet = preparedStatement.executeQuery();
+            ps.setInt(1, idDish);
 
-            while(resultSet.next()) {
-                Ingredient ingredient = new Ingredient();
-                ingredient.setId(resultSet.getInt("id"));
-                ingredient.setName(resultSet.getString("name"));
-                ingredient.setPrice(resultSet.getDouble("price"));
-                ingredient.setCategory(CategoryEnum.valueOf(resultSet.getString("category")));
-                Object requiredQuantity = resultSet.getObject("quantity_required");
-                ingredient.setQuantity(requiredQuantity == null ? null : resultSet.getDouble("required_quantity"));
+            ResultSet rs =  ps.executeQuery();
+
+            while(rs.next()) {
+                DishIngredient ingredient = new DishIngredient();
+                ingredient.setId(rs.getInt("dish_ingredient_id"));
+                ingredient.setDish(
+                        new Dish(
+                            rs.getInt("dish_id"),
+                                rs.getString("dish_name"),
+                                DishTypeEnum.valueOf(rs.getString("dish_type"))
+                                rs.getDouble("dish_price")
+                        )
+                );
+                ingredient.setIngredient(
+                        new Ingredient(
+                                rs.getInt("ingredient_id"),
+                                rs.getString("ingredient_name"),
+                                CategoryEnum.valueOf(rs.getString("ingredient_category")),
+                                rs.getDouble("ingredient_price")
+                        )
+                );
+                ingredient.setUnit(Unit.valueOf(rs.getString("ingredient_unit")));
+                ingredient.setQuantity(rs.getDouble("quantity_required"));
                 ingredients.add(ingredient);
             }
-            dbConnection.closeConnection(connection);
-            return ingredients;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
+        return ingredients;
     }
 
 
