@@ -188,20 +188,26 @@ public class DataRetriever {
         Connection connection = dbConnection.getConnection();
         List<Ingredient> ingredients = new ArrayList<>();
         try {
-            PreparedStatement preparedStatement = connection.prepareStatement(
-                    """
-                            select ingredient.id, ingredient.name, ingredient.price, ingredient.category, ingredient.required_quantity
-                            from ingredient where id_dish = ?;
-                            """);
+            PreparedStatement preparedStatement = connection.prepareStatement("""
+            SELECT i.id, i.name, i.price, i.category,
+                   di.quantity_required
+            FROM ingredient i
+            JOIN dishingredients di
+            ON i.id =  di.id_ingredient
+            WHERE id_dish = ?
+            """);
+
             preparedStatement.setInt(1, idDish);
+
             ResultSet resultSet = preparedStatement.executeQuery();
-            while (resultSet.next()) {
+
+            while(resultSet.next()) {
                 Ingredient ingredient = new Ingredient();
                 ingredient.setId(resultSet.getInt("id"));
                 ingredient.setName(resultSet.getString("name"));
                 ingredient.setPrice(resultSet.getDouble("price"));
                 ingredient.setCategory(CategoryEnum.valueOf(resultSet.getString("category")));
-                Object requiredQuantity = resultSet.getObject("required_quantity");
+                Object requiredQuantity = resultSet.getObject("quantity_required");
                 ingredient.setQuantity(requiredQuantity == null ? null : resultSet.getDouble("required_quantity"));
                 ingredients.add(ingredient);
             }
