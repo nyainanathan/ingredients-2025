@@ -67,13 +67,44 @@ public class DataRetriever {
                 }
             }
 
-            List<Ingredient> newIngredients = toSave.getIngredients();
-            detachIngredients(conn, dishId, newIngredients);
-            attachIngredients(conn, dishId, newIngredients);
-
+            List<DishIngredient> newIngredients = toSave.getIngredients();
+            detachAndAttachIngredients(conn, dishId, newIngredients);
             conn.commit();
             return findDishById(dishId);
         } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void detachAndAttachIngredients(Connection conn, Integer dishId, List<DishIngredient> ingredients) throws SQLException {
+        //Detach first
+        PreparedStatement detachStatement = conn.prepareStatement("""
+        DELETE FROM dishingredients WHERE id_dish = ?
+        """);
+
+        detachStatement.setInt(1, dishId);
+
+        detachStatement.execute();
+
+        //Then attach
+        String attachmentQuery = """
+                INSERT INTO dishingredients (id, id_dish, id_ingredient, quantity_required, unit)
+                VALUES (?, ?, ?, ?, ?::unit_type)
+                """;
+
+        try {
+            PreparedStatement attachStatement = conn.prepareStatement(attachmentQuery);
+            for(DishIngredient ingredient : ingredients) {
+                attachStatement.clearParameters();
+                attachStatement.setInt(1, getNextSerialValue(conn, "dishingredients", "id"));
+                attachStatement.setInt(2, dishId);
+                attachStatement.setInt(3, ingredient.getId());
+                attachStatement.setDouble(4, ingredient.getQuantity());
+                attachStatement.setString(5, String.valueOf(ingredient.getUnit()));
+                attachStatement.addBatch();
+            }
+            attachStatement.executeBatch();
+        } catch (Exception e){
             throw new RuntimeException(e);
         }
     }
