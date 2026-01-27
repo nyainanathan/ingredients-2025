@@ -25,7 +25,7 @@ public class DataRetriever {
                 dish.setDishType(DishTypeEnum.valueOf(resultSet.getString("dish_type")));
                 dish.setPrice(resultSet.getObject("dish_price") == null
                         ? null : resultSet.getDouble("dish_price"));
-                dish.setIngredients(findIngredientByDishId(id));
+                dish.setIngredients(findDishIngredientByDishId(id));
                 return dish;
             }
             dbConnection.closeConnection(connection);
