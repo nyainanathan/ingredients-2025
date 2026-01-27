@@ -23,3 +23,16 @@ update dish
 set price = 6000.0
 where id = 2;
 
+--updates td3
+insert into public.dishingredients (id, id_dish, id_ingredient, quantity_required,unit)
+values (1, 1, 1, 0.20, 'KG'),
+       (2, 1, 2, 0.15, 'KG'),
+       (3, 2, 3, 1.00, 'KG'),
+       (4, 4, 4, 0.30, 'KG'),
+       (5, 4, 5, 0.20, 'KG');
+
+select * from dish order by id;
+
+update dish set price = 3500.0 where id = 1 ;
+update dish set price = 12000.0 where id = 2 ;
+update dish set price = 8000.0 where id = 4 ;

@@ -1,4 +1,4 @@
-create type unit_type as enum('PCS', 'KD', 'L');
+create type unit_type as enum('PCS', 'KG', 'L');
 
 create table DishIngredients(
     id serial primary key ,
