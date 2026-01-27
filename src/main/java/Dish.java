@@ -18,12 +18,9 @@ public class Dish {
 
     public Double getDishCost() {
         double totalPrice = 0;
-        for (int i = 0; i < ingredients.size(); i++) {
-            Double quantity = ingredients.get(i).getQuantity();
-            if(quantity == null) {
-                throw new RuntimeException("...");
-            }
-            totalPrice = totalPrice + ingredients.get(i).getPrice() * quantity;
+        for (DishIngredient ingredient : ingredients) {
+            Double quantity = ingredient.getQuantity();
+            totalPrice = totalPrice + ingredient.getIngredient().getPrice() *  quantity;
         }
         return totalPrice;
     }
