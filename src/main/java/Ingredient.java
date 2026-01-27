@@ -5,16 +5,6 @@ public class Ingredient {
     private String name;
     private CategoryEnum category;
     private Double price;
-    private Dish dish;
-    private Double quantity;
-
-    public Double getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Double quantity) {
-        this.quantity = quantity;
-    }
 
     public Ingredient() {
     }
@@ -66,14 +56,6 @@ public class Ingredient {
         this.price = price;
     }
 
-    public Dish getDish() {
-        return dish;
-    }
-
-    public void setDish(Dish dish) {
-        this.dish = dish;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -83,7 +65,7 @@ public class Ingredient {
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, category, price, dish);
+        return Objects.hash(id, name, category, price);
     }
 
     @Override
@@ -94,7 +76,6 @@ public class Ingredient {
                 ", category=" + category +
                 ", price=" + price +
                 ", dishName=" + getDishName() +
-                ", quantity=" + quantity +
                 '}';
     }
 }

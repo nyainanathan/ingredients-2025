@@ -127,61 +127,61 @@ public class DataRetriever {
     }
 
 
-    private void detachIngredients(Connection conn, Integer dishId, List<Ingredient> ingredients)
-            throws SQLException {
-        if (ingredients == null || ingredients.isEmpty()) {
-            try (PreparedStatement ps = conn.prepareStatement(
-                    "UPDATE ingredient SET id_dish = NULL WHERE id_dish = ?")) {
-                ps.setInt(1, dishId);
-                ps.executeUpdate();
-            }
-            return;
-        }
-
-        String baseSql = """
-                    UPDATE ingredient
-                    SET id_dish = NULL
-                    WHERE id_dish = ? AND id NOT IN (%s)
-                """;
-
-        String inClause = ingredients.stream()
-                .map(i -> "?")
-                .collect(Collectors.joining(","));
-
-        String sql = String.format(baseSql, inClause);
-
-        try (PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setInt(1, dishId);
-            int index = 2;
-            for (Ingredient ingredient : ingredients) {
-                ps.setInt(index++, ingredient.getId());
-            }
-            ps.executeUpdate();
-        }
-    }
-
-    private void attachIngredients(Connection conn, Integer dishId, List<Ingredient> ingredients)
-            throws SQLException {
-
-        if (ingredients == null || ingredients.isEmpty()) {
-            return;
-        }
-
-        String attachSql = """
-                    UPDATE ingredient
-                    SET id_dish = ?
-                    WHERE id = ?
-                """;
-
-        try (PreparedStatement ps = conn.prepareStatement(attachSql)) {
-            for (Ingredient ingredient : ingredients) {
-                ps.setInt(1, dishId);
-                ps.setInt(2, ingredient.getId());
-                ps.addBatch(); // Can be substitute ps.executeUpdate() but bad performance
-            }
-            ps.executeBatch();
-        }
-    }
+//    private void detachIngredients(Connection conn, Integer dishId, List<Ingredient> ingredients)
+//            throws SQLException {
+//        if (ingredients == null || ingredients.isEmpty()) {
+//            try (PreparedStatement ps = conn.prepareStatement(
+//                    "UPDATE ingredient SET id_dish = NULL WHERE id_dish = ?")) {
+//                ps.setInt(1, dishId);
+//                ps.executeUpdate();
+//            }
+//            return;
+//        }
+//
+//        String baseSql = """
+//                    UPDATE ingredient
+//                    SET id_dish = NULL
+//                    WHERE id_dish = ? AND id NOT IN (%s)
+//                """;
+//
+//        String inClause = ingredients.stream()
+//                .map(i -> "?")
+//                .collect(Collectors.joining(","));
+//
+//        String sql = String.format(baseSql, inClause);
+//
+//        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+//            ps.setInt(1, dishId);
+//            int index = 2;
+//            for (Ingredient ingredient : ingredients) {
+//                ps.setInt(index++, ingredient.getId());
+//            }
+//            ps.executeUpdate();
+//        }
+//    }
+//
+//    private void attachIngredients(Connection conn, Integer dishId, List<Ingredient> ingredients)
+//            throws SQLException {
+//
+//        if (ingredients == null || ingredients.isEmpty()) {
+//            return;
+//        }
+//
+//        String attachSql = """
+//                    UPDATE ingredient
+//                    SET id_dish = ?
+//                    WHERE id = ?
+//                """;
+//
+//        try (PreparedStatement ps = conn.prepareStatement(attachSql)) {
+//            for (Ingredient ingredient : ingredients) {
+//                ps.setInt(1, dishId);
+//                ps.setInt(2, ingredient.getId());
+//                ps.addBatch(); // Can be substitute ps.executeUpdate() but bad performance
+//            }
+//            ps.executeBatch();
+//        }
+//    }
 
     private List<Ingredient> findIngredientByDishId(Integer idDish) {
         DBConnection dbConnection = new DBConnection();
