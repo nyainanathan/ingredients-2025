@@ -1,3 +1,5 @@
+import java.time.Instant;
+import java.util.List;
 import java.util.Objects;
 
 public class Ingredient {
@@ -5,6 +7,7 @@ public class Ingredient {
     private String name;
     private CategoryEnum category;
     private Double price;
+    private List<StockMovement> stockMovementList;
 
     public Ingredient() {
     }
@@ -52,6 +55,14 @@ public class Ingredient {
         this.price = price;
     }
 
+    public List<StockMovement> getStockMovementList() {
+        return stockMovementList;
+    }
+
+    public void setStockMovementList(List<StockMovement> stockMovementList) {
+        this.stockMovementList = stockMovementList;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -72,5 +83,25 @@ public class Ingredient {
                 ", category=" + category +
                 ", price=" + price +
                 '}';
+    }
+
+    StockValue getStockValueAt(Instant t) {
+        List<Instant> movementInstant = this.getStockMovementList().stream()
+                .map(StockMovement::getCreationDatetime)
+                .toList();
+
+        int movementIndex = 0;
+
+        for(int i  = 0; i < movementInstant.size(); i++) {
+            if(i == movementInstant.size() - 1 && t.isAfter(movementInstant.get(i))) {
+                movementIndex = i;
+            }
+            if(i != movementInstant.size() - 1 && i != 0 && t.isBefore(movementInstant.get(i + 1)) && t.isAfter(movementInstant.get(i - 1))) {
+                movementIndex = i;
+                break;
+            }
+        }
+
+        return this.getStockMovementList().get(movementIndex).getValue();
     }
 }

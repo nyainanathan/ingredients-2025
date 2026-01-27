@@ -11,3 +11,14 @@ create table DishIngredients(
 alter table ingredient drop column  id_dish;
 
 alter table ingredient drop column  required_quantity;
+
+create type movement_type as enum ('IN', 'OUT');
+
+create table StockMovement(
+                                id serial primary key,
+                                id_ingredient int references ingredient(id),
+                                quantity numeric(10,2),
+                                type movement_type,
+                                unit unit_type,
+                                creation_datetime timestamp default now()
+  );
