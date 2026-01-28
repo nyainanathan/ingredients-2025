@@ -86,22 +86,20 @@ public class Ingredient {
     }
 
     StockValue getStockValueAt(Instant t) {
-        List<Instant> movementInstant = this.getStockMovementList().stream()
-                .map(StockMovement::getCreationDatetime)
-                .toList();
-
-        int movementIndex = 0;
-
-        for(int i  = 0; i < movementInstant.size(); i++) {
-            if(i == movementInstant.size() - 1 && t.isAfter(movementInstant.get(i))) {
-                movementIndex = i;
-            }
-            if(i != movementInstant.size() - 1 && i != 0 && t.isBefore(movementInstant.get(i + 1)) && t.isAfter(movementInstant.get(i - 1))) {
-                movementIndex = i;
+        double quantity = 0;
+        for(StockMovement m : stockMovementList){
+            if(m.getCreationDatetime().isAfter(t)){
                 break;
             }
+            if(m.getType()==MovementTypeEnum.IN){
+                quantity += m.getValue().getQuantity();
+            } else {
+                quantity -= m.getValue().getQuantity();
+            }
         }
-
-        return this.getStockMovementList().get(movementIndex).getValue();
+        return new StockValue(
+                quantity,
+                Unit.KG
+        );
     }
 }
