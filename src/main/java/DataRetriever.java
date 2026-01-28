@@ -1,7 +1,6 @@
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class DataRetriever {
     Dish findDishById(Integer id) {
@@ -154,6 +153,54 @@ public class DataRetriever {
         }
     }
 
+    public Ingredient saveIngredient(Ingredient tosave) {
+
+        try (Connection conn = new DBConnection().getConnection()) {
+        //Insert or update the ingredient first
+
+            PreparedStatement ps1 = conn.prepareStatement("""
+                INSERT INTO ingredient (id, name, category, price)
+                VALUES (?, ?, ?::ingredient_category, ?)
+                ON CONFLICT(id)
+                DO UPDATE SET
+                              name = excluded.name,
+                              category = excluded.category,
+                              price = excluded.price
+            """);
+
+            ps1.setInt(1, tosave.getId());
+            ps1.setString(2, tosave.getName());
+            ps1.setString(3, String.valueOf(tosave.getCategory()));
+            ps1.setDouble(4, tosave.getPrice());
+
+            ps1.executeUpdate();
+
+            //Only then insert the movement
+            PreparedStatement ps2 = conn.prepareStatement("""
+                INSERT INTO stockmovement (id, id_ingredient, quantity, type, unit, creation_datetime)
+                VALUES (?, ?, ?, ?::movement_type, ?::unit_type, ?)
+                ON CONFLICT(id)
+                DO NOTHING
+            """);
+
+            for(StockMovement movemenet : tosave.getStockMovementList()){
+                ps2.clearParameters();
+                ps2.setInt(1, movemenet.getId());
+                ps2.setInt(2, tosave.getId());
+                ps2.setDouble(4, movemenet.getValue().getQuantity());
+                ps2.setString(4, String.valueOf(movemenet.getType()));
+                ps2.setObject(5, movemenet.getCreationDatetime());
+                ps2.addBatch();
+            }
+
+            ps2.executeBatch();
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return tosave;
+    }
+
     private List<DishIngredient> findDishIngredientByDishId(Integer idDish) {
         DBConnection dbConnection = new DBConnection();
         Connection connection = dbConnection.getConnection();
@@ -213,7 +260,6 @@ public class DataRetriever {
         }
         return ingredients;
     }
-
 
     private String getSerialSequenceName(Connection conn, String tableName, String columnName)
             throws SQLException {
