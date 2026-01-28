@@ -1,4 +1,5 @@
 import java.sql.*;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -153,6 +154,67 @@ public class DataRetriever {
         }
     }
 
+    public Ingredient findIngredientById(int id){
+
+        Ingredient ingredient = new Ingredient();
+
+        try(Connection conn = new DBConnection().getConnection()){
+            //Find the ingredient first
+            PreparedStatement ingredientStatement = conn.prepareStatement("""
+                    SELECT id, name, category, price
+                    FROM  ingredient WHERE id = ?
+            """);
+
+            ingredientStatement.setInt(1, id);
+
+            ResultSet rs = ingredientStatement.executeQuery();
+
+            List<StockMovement> stockMovementList = new ArrayList<>();
+
+            if(rs.next()){
+                ingredient.setId(rs.getInt("id"));
+                ingredient.setName(rs.getString("name"));
+                ingredient.setCategory(CategoryEnum.valueOf(rs.getString("category")));
+                ingredient.setPrice(rs.getDouble("price"));
+            }
+
+
+//            System.out.println(ingredient);
+
+            //Find the movement associated to the ingredient
+            PreparedStatement movementStatement = conn.prepareStatement("""
+                SELECT id, quantity, unit, type, creation_datetime
+                FROM stockmovement
+                WHERE id_ingredient = ?
+            """);
+
+            movementStatement.setInt(1, id);
+
+//            System.out.println(movementStatement);
+
+            ResultSet rsMovement = movementStatement.executeQuery();
+
+            while(rsMovement.next()){
+                stockMovementList.add(new StockMovement(
+                    rsMovement.getInt("id"),
+                        new StockValue(
+                                rsMovement.getDouble("quantity"),
+                                Unit.valueOf(rsMovement.getString("unit"))
+                        ),
+                        MovementTypeEnum.valueOf(rsMovement.getString("type")),
+                        rsMovement.getTimestamp("creation_datetime").toInstant()
+                ));
+            }
+
+            ingredient.setStockMovementList(stockMovementList);
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return ingredient;
+    }
+
     public Ingredient saveIngredient(Ingredient tosave) {
 
         try (Connection conn = new DBConnection().getConnection()) {
@@ -187,7 +249,7 @@ public class DataRetriever {
                 ps2.clearParameters();
                 ps2.setInt(1, movemenet.getId());
                 ps2.setInt(2, tosave.getId());
-                ps2.setDouble(4, movemenet.getValue().getQuantity());
+                ps2.setDouble(3, movemenet.getValue().getQuantity());
                 ps2.setString(4, String.valueOf(movemenet.getType()));
                 ps2.setObject(5, movemenet.getCreationDatetime());
                 ps2.addBatch();

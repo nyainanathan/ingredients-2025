@@ -22,3 +22,7 @@ create table StockMovement(
                                 unit unit_type,
                                 creation_datetime timestamp default now()
   );
+
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'stockmovement';

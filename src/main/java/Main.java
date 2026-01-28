@@ -1,3 +1,4 @@
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -5,9 +6,9 @@ public class Main {
     public static void main(String[] args) {
         // Log before changes
         DataRetriever dataRetriever = new DataRetriever();
-        Dish dish = dataRetriever.findDishById(4
-        );
-        System.out.println(dish);
+//        Dish dish = dataRetriever.findDishById(4
+//        );
+//        System.out.println(dish);
 
         // Log after changes
 //        dish.setIngredients(List.of(new Ingredient(1), new Ingredient(2)));
@@ -18,19 +19,31 @@ public class Main {
         //List<Ingredient> createdIngredients = dataRetriever.createIngredients(List.of(new Ingredient(null, "Fromage", CategoryEnum.DAIRY, 1200.0)));
         //System.out.println(createdIngredients);
 
-        List<Dish> dishesToTest  = new ArrayList<>();
-        dishesToTest.add(dataRetriever.findDishById(1));
-        dishesToTest.add(dataRetriever.findDishById(2));
-        dishesToTest.add(dataRetriever.findDishById(3));
-        dishesToTest.add(dataRetriever.findDishById(4));
-        dishesToTest.add(dataRetriever.findDishById(5));
-        for(Dish d : dishesToTest) {
-            System.out.println(d.getName() + " | cost: " + d.getDishCost());
-            try {
-            System.out.println(d.getName() + " | margin: " + d.getGrossMargin());
-            } catch (Exception e) {
-                System.out.println(e.getMessage());
-            }
+//        List<Dish> dishesToTest  = new ArrayList<>();
+//        dishesToTest.add(dataRetriever.findDishById(1));
+//        dishesToTest.add(dataRetriever.findDishById(2));
+//        dishesToTest.add(dataRetriever.findDishById(3));
+//        dishesToTest.add(dataRetriever.findDishById(4));
+//        dishesToTest.add(dataRetriever.findDishById(5));
+//        for(Dish d : dishesToTest) {
+//            System.out.println(d.getName() + " | cost: " + d.getDishCost());
+//            try {
+//            System.out.println(d.getName() + " | margin: " + d.getGrossMargin());
+//            } catch (Exception e) {
+//                System.out.println(e.getMessage());
+//            }
+//        }
+
+        List<Ingredient> ingredientToTest = new ArrayList<>();
+        for(int i = 1; i <=5; i++){
+            ingredientToTest.add(dataRetriever.findIngredientById(i));
+        }
+
+//        for(Ingredient ingredient : ingredientToTest){
+//            System.out.println(ingredient);
+//        }
+        for(Ingredient i :  ingredientToTest){
+            System.out.println(i.getStockValueAt(Instant.parse("2024-01-06T12:00:00Z")).getQuantity());
         }
     }
 }
